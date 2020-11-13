@@ -62,7 +62,7 @@ function rprompt_separator() {
 }
 
 function prompt_start() {
-  local bg_col=%{$BG[196]%}
+  local bg_col=%{$BG[104]%}
   
   local ret_status="%(?:%{$fg[green]%} $ICONS[apple_logo] :%{$fg[red]%} $ICONS[apple_logo] )${reset_color}"
   echo "${bg_col}${ret_status}"
@@ -70,8 +70,8 @@ function prompt_start() {
 
 function prompt_dir() {
   #local bg_col=%{$BG[240]%}
-  local bg_col=%{$BG[210]%}
-  local fg_col=%{$FG[196]%}
+  local bg_col=%{$BG[209]%}
+  local fg_col=%{$FG[104]%}
   local dir_icon="%{$fg[blue]%}  $ICONS[folder] "
   local directory="%{$fg[white]%}%~"
 
@@ -80,11 +80,11 @@ function prompt_dir() {
 
 function prompt_git () {
 
-  local bg_col=$BG[224]
-  local fg_col=$FG[210]
+  local bg_col=$BG[240]
+  local fg_col=$FG[209]
 
   local prompt_git_start="%{$fg_col%}$(prompt_separator)"
-  local prompt_git_end="%{$reset_color%}%{$FG[224]%}$(prompt_separator)"
+  local prompt_git_end="%{$reset_color%}%{$FG[240]%}$(prompt_separator)"
   # https://stackoverflow.com/questions/2180270/check-if-current-directory-is-a-git-repository
   if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1; then
     echo "%{$bg_col%}${prompt_git_start} %{$fg[blue]%} $(parse_git_dirty) %{$fg[17]%}$(git_current_branch)$(git_prompt_status)$(git_remote_status)$(git_prompt_remote)${prompt_git_end}"
@@ -127,14 +127,14 @@ function prompt_battery() {
     icon=$ICONS[battery_plugged_in]
     batt_col=$fg[green]
   fi
-  echo "%{$FG[196]%}$(rprompt_separator) %{$BG[196]%} %{$batt_col%}${icon}${power_icon} %{$fg[white]%}${battery_perc}%% %{$reset_color%}"
+  echo "%{$FG[209]%}$(rprompt_separator) %{$BG[209]%} %{$batt_col%}${icon}${power_icon} %{$fg[white]%}${battery_perc}%% %{$reset_color%}"
 }
 
 function prompt_time() {
   local time_icon="%{$fg[cyan]%}${ICONS[time]}"
   local the_time="%{$fg[white]%}[%T]"
 
-  echo "%{$FG[210]%}$(rprompt_separator) %{$BG[210]%} ${time_icon} ${the_time}"
+  echo "%{$FG[240]%}$(rprompt_separator) %{$BG[240]%} ${time_icon} ${the_time}"
 }
 
 function prompt_ruby_rbenv() {
@@ -146,8 +146,8 @@ function prompt_ruby_rbenv() {
 }
 
 function prompt_weather(){
-    local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=101021700&key=d437cf0c800d4c2abef5174a0bfe029e&gzip=n")
+    local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=101021700&key=f2359a5269a2481489ee834d76a0cfc9&gzip=n")
     local temp=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['now']['temp']) if a['code']=='200' else '')")
     local text=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['now']['text']) if a['code']=='200' else '')")
-    echo "%{$BG[196]%}%{$FG[231]%}${ICONS[left_point]}   $text $temp℃ %{$reset_color%}"
+    echo "%{$BG[209]%}%{$FG[104]%}$(rprompt_separator) %{$BG[104]%}%{$fg[white]%} $text $temp℃ %{$reset_color%}"
 }
