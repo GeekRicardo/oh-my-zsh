@@ -148,27 +148,28 @@ function prompt_ruby_rbenv() {
 }
 
 function prompt_weather(){
-    # TODO 时间间隔15min获取天气
-    old_time=$(cat /tmp/temp|awk '{print int($1)}')
-    if [[ ! -f "/tmp/temp" ]] || [[ `expr $(date "+%M"|awk '{print int($0)}') - $old_time` -gt 10 ]]; then
+    # 时间间隔10min获取天气
+    if [[ ! -f "/tmp/temp" ]] || [[ `expr $(date "+%M"|awk '{print int($0)}') - $(cat /tmp/temp|awk '{print int($1)}')` -gt 10 ]]; then
     #if 1 ;then
         echo "load weather - $(date '+%Y-%m-%d %H:%M:%S')" > /tmp/weather_log.log
         localtion="101021200"
-        local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=${localtion}&key=f1389a5269a2481489ee834d76a0cfc9&gzip=n")
-        code=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['code']))")
-        if [ ! $code = "200" ]; then
-            local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=${localtion}&key=d437cf0c800d4c2abef5174a0bfe029e&gzip=n")
-        fi
-        local temp=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['now']['temp']) if a['code']=='200' else '')")
+        weather_sign_key="f1389a5269a2481489ee834d76a0cfc9"
+        local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=${localtion}&key=${weather_sign_key}&gzip=n")
+        ##备用key，防止一天的请求次数超过了
+        #code=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['code']))")
+        #if [ ! $code = "200" ]; then
+            #local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=${localtion}&key=d437cf0c800d4c2abef5174a0bfe029e&gzip=n")
+        #fi
+        local temp=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['now']['temp']) if a['code']=='200' else 'error')")
         local text=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['now']['text']) if a['code']=='200' else '')")
         echo "$(date '+%M') ${temp}" > /tmp/temp
         echo $text > /tmp/text
     else
-        echo "use old"> /tmp/weather_log.log
+        echo "use old" >> /tmp/weather_log.log
         local temp=$(cat /tmp/temp|awk '{print $2}')
         local text=$(cat /tmp/text)
     fi
-    #text=中雨
+    #text=雷阵雨
     if [ $text = "晴" ];then
         local icon="%{$FG[222]%}${ICONS[sun]}%{$fg[white]%}"
     elif [ $text = '多云' ];then
@@ -177,8 +178,13 @@ function prompt_weather(){
         local icon="%{$FG[17]%}${ICONS[rain]} ${ICONS[rain]} ${ICONS[rain]}%{$fg[white]%}"
     elif [ $text = '中雨' ];then
         local icon="%{$FG[17]%}${ICONS[rain]} ${ICONS[rain]}%{$fg[white]%}"
-    elif [[ $text =~ '雨' ]];then #包含
-        local icon="%{$FG[17]%}${ICONS[rain]}%{$fg[white]%}"
+#    elif [ $text = '雷阵雨' ];then
+        #local icon="%{$FG[17]%} ⛈ %{$fg[white]%}"
+    #elif [[ $text =~ '雨' ]];then #包含
+        #local icon="%{$FG[17]%}${ICONS[rain]}%{$fg[white]%}"
+    #elif [[ $text =~ '雪' ]];then #包含
+#        local icon="%{$FG[17]%} ☃️  %{$fg[white]%}"
+       #local icon="%{$fg[red]%}×%{$fg[white]%}"
     fi
     echo "%{$BG[209]%}%{$FG[104]%}$(rprompt_separator) %{$BG[104]%}%{$fg[white]%} $icon $temp℃ %{$reset_color%}"
 }
