@@ -149,10 +149,10 @@ function prompt_ruby_rbenv() {
 
 function prompt_weather(){
     # TODO 时间间隔15min获取天气
-    old_time=$(echo /tmp/temp|awk '{print int($1)}')
-    if [[ ! -f "/tmp/temp" ]] || [[ $(($(date "+%M"| awk '{print int($0)}') % 15)) = 0 ]]; then
+    old_time=$(cat /tmp/temp|awk '{print int($1)}')
+    if [[ ! -f "/tmp/temp" ]] || [[ `expr $(date "+%M"|awk '{print int($0)}') - $old_time` -gt 10 ]]; then
     #if 1 ;then
-        #echo "load weather"
+        echo "load weather - $(date '+%Y-%m-%d %H:%M:%S')" > /tmp/weather_log.log
         localtion="101021200"
         local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=${localtion}&key=f1389a5269a2481489ee834d76a0cfc9&gzip=n")
         code=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['code']))")
@@ -164,7 +164,7 @@ function prompt_weather(){
         echo "$(date '+%M') ${temp}" > /tmp/temp
         echo $text > /tmp/text
     else
-        #echo "use old"
+        echo "use old"> /tmp/weather_log.log
         local temp=$(cat /tmp/temp|awk '{print $2}')
         local text=$(cat /tmp/text)
     fi
