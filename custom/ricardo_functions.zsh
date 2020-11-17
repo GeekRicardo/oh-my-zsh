@@ -149,19 +149,25 @@ function prompt_ruby_rbenv() {
 
 function prompt_weather(){
     # 时间间隔10min获取天气
+    # TODO 在text中出现error时重新获取
+    # 安装json解析jq
+    if [[ ! $(which jq) =~ "bin/jq" ]];then
+        apt install jq -y
+    fi
+
     if [[ ! -f "/tmp/temp" ]] || [[ `expr $(date "+%M"|awk '{print int($0)}') - $(cat /tmp/temp|awk '{print int($1)}')` -gt 10 ]]; then
     #if 1 ;then
         echo "load weather - $(date '+%Y-%m-%d %H:%M:%S')" > /tmp/weather_log.log
         localtion="101021200"
         weather_sign_key="f1389a5269a2481489ee834d76a0cfc9"
         local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=${localtion}&key=${weather_sign_key}&gzip=n")
-        ##备用key，防止一天的请求次数超过了
-        #code=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['code']))")
-        #if [ ! $code = "200" ]; then
-            #local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=${localtion}&key=d437cf0c800d4c2abef5174a0bfe029e&gzip=n")
-        #fi
-        local temp=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['now']['temp']) if a['code']=='200' else 'error')")
-        local text=$(echo $weatherjson|python3 -c "import sys,json;a=json.load(sys.stdin);print((a['now']['text']) if a['code']=='200' else '')")
+        #备用key，防止一天的请求次数超过了
+        code=$(echo $weatherjson|jq ".code")
+        if [ ! $code = "200" ]; then
+            local weatherjson=$(curl -s "https://devapi.qweather.com/v7/weather/now?location=${localtion}&key=d437cf0c800d4c2abef5174a0bfe029e&gzip=n")
+        fi
+        local temp=$(echo $weatherjson|jq ".now.temp"|sed 's/\"//g')
+        local text=$(echo $weatherjson|jq ".now.text"|sed 's/\"//g')
         echo "$(date '+%M') ${temp}" > /tmp/temp
         echo $text > /tmp/text
     else
@@ -184,7 +190,8 @@ function prompt_weather(){
         #local icon="%{$FG[17]%}${ICONS[rain]}%{$fg[white]%}"
     #elif [[ $text =~ '雪' ]];then #包含
 #        local icon="%{$FG[17]%} ☃️  %{$fg[white]%}"
-       #local icon="%{$fg[red]%}×%{$fg[white]%}"
+    else
+        local icon="%{$fg[red]%}×%{$fg[white]%}"
     fi
     echo "%{$BG[209]%}%{$FG[104]%}$(rprompt_separator) %{$BG[104]%}%{$fg[white]%} $icon $temp℃ %{$reset_color%}"
 }
