@@ -134,7 +134,7 @@ function prompt_battery() {
 function prompt_time() {
   local time_icon="%{$fg[cyan]%}${ICONS[time]}"
   local time_icon="%{$fg[black]%}${ICONS[time]}"
-  local the_time="%{$fg[black]%}[%T]"
+  local the_time="%{$fg[black]%}[%*]"
 
   echo "%{$FG[223]%}$(rprompt_separator) %{$BG[223]%} %{$fg[black]%}${time_icon} ${the_time}"
 }
@@ -171,7 +171,7 @@ function prompt_weather(){
         echo "$(date '+%M') ${temp}" > /tmp/temp
         echo $text > /tmp/text
     else
-        echo "use old" >> /tmp/weather_log.log
+        echo "use old - $(date "+%H:%M:%S")" >> /tmp/weather_log.log
         local temp=$(cat /tmp/temp|awk '{print $2}')
         local text=$(cat /tmp/text)
     fi
