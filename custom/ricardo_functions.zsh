@@ -155,7 +155,13 @@ function prompt_weather(){
         apt install jq -y
     fi
 
-    if [[ ! -f "/tmp/temp" ]] || [[ `expr $(date "+%M"|awk '{print int($0)}') - $(cat /tmp/temp|awk '{print int($1)}')` -gt 10 ]]; then
+    # 获取时间间隔，取正
+    if [[ ! -f "/tmp/temp" ]]; then
+        touch /tmp/temp
+    fi 
+    #timespan=`expr $(date "+%M"|awk '{print int($0)}') - $(cat /tmp/temp|awk '{print int($1)}')`
+    #if [[ $timespan -lt 0 ]]; then let timespan=$(echo $timespan|awk '{print sqrt($1*$1)}');fi
+    if [[ `expr $(date "+%M"|awk '{print int($0)}') - $(cat /tmp/temp|awk '{print int($1)}')` -gt 10 ]]; then
     #if 1 ;then
         echo "load weather - $(date '+%Y-%m-%d %H:%M:%S')" > /tmp/weather_log.log
         localtion="101021200"
