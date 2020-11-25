@@ -50,6 +50,7 @@ ICONS=(
   sun                $'\ue214' # 
   windy              $'\ue21d' #
   rain               $'\ue239' #
+  shade              $' '
   left_point         $'\ue0c3' #
 )
 
@@ -155,14 +156,19 @@ function prompt_weather(){
         apt install jq -y
     fi
 
+    isLoad=0
+    if [ ! -f "/tmp/temp" ]; then let isLoad=1; fi 
     # 获取时间间隔，取正
-    if [[ ! -f "/tmp/temp" ]]; then
-        touch /tmp/temp
-    fi 
-    #timespan=`expr $(date "+%M"|awk '{print int($0)}') - $(cat /tmp/temp|awk '{print int($1)}')`
-    #if [[ $timespan -lt 0 ]]; then let timespan=$(echo $timespan|awk '{print sqrt($1*$1)}');fi
-    if [[ `expr $(date "+%M"|awk '{print int($0)}') - $(cat /tmp/temp|awk '{print int($1)}')` -gt 10 ]]; then
-    #if 1 ;then
+    if [ $isLoad -eq 0 ]; then
+        time1=`date +%s`
+        time2=$(cat /tmp/temp|awk '{print int($1)}')
+        timespan=`expr $time1 - $time2`
+        if [ $timespan -gt 600 ]; then
+            let isLoad=1
+        fi
+    fi
+
+    if [ $isLoad -eq 1 ]; then
         echo "load weather - $(date '+%Y-%m-%d %H:%M:%S')" > /tmp/weather_log.log
         localtion="101021200"
         weather_sign_key="f1389a5269a2481489ee834d76a0cfc9"
@@ -174,12 +180,11 @@ function prompt_weather(){
         fi
         local temp=$(echo $weatherjson|jq ".now.temp"|sed 's/\"//g')
         local text=$(echo $weatherjson|jq ".now.text"|sed 's/\"//g')
-        echo "$(date '+%M') ${temp}" > /tmp/temp
-        echo $text > /tmp/text
+        echo "$(date '+%s') ${temp} $text" > /tmp/temp
     else
         echo "use old - $(date "+%H:%M:%S")" >> /tmp/weather_log.log
         local temp=$(cat /tmp/temp|awk '{print $2}')
-        local text=$(cat /tmp/text)
+        local text=$(cat /tmp/temp|awk '{print $3}')
     fi
     #text=雷阵雨
     if [ $text = "晴" ];then
@@ -190,6 +195,8 @@ function prompt_weather(){
         local icon="%{$FG[17]%}${ICONS[rain]} ${ICONS[rain]} ${ICONS[rain]}%{$fg[white]%}"
     elif [ $text = '中雨' ];then
         local icon="%{$FG[17]%}${ICONS[rain]} ${ICONS[rain]}%{$fg[white]%}"
+#    elif [ $text = '阴' ];then
+        #local icon="%{$FG[243]%}${ICONS[shade]}%{$fg[white]%}"
 #    elif [ $text = '雷阵雨' ];then
         #local icon="%{$FG[17]%} ⛈ %{$fg[white]%}"
     #elif [[ $text =~ '雨' ]];then #包含
@@ -197,7 +204,8 @@ function prompt_weather(){
     #elif [[ $text =~ '雪' ]];then #包含
 #        local icon="%{$FG[17]%} ☃️  %{$fg[white]%}"
     else
-        local icon="%{$fg[red]%}×%{$fg[white]%}"
+        local icon="%{$fg[white]%}${text}%{$fg[white]%}"
+        #local icon="%{$fg[red]%}×%{$fg[white]%}"
     fi
     echo "%{$BG[209]%}%{$FG[104]%}$(rprompt_separator) %{$BG[104]%}%{$fg[white]%} $icon $temp℃ %{$reset_color%}"
 }
