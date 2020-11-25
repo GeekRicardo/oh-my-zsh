@@ -47,10 +47,15 @@ ICONS=(
   git_remote_missing $'\uf658' # 
 
   # weather icons
-  sun                $'\ue214' # 
-  windy              $'\ue21d' #
-  rain               $'\ue239' #
-  shade              $' '
+  sun                $'\u7003' # 
+  windy              $'\u7042' #
+  litte_rain         $'\u7030' #
+  rain               $'\u7031' #
+  heavy_rain         $'\u7032' #
+  other_rain         $'\u7033'
+  thunder            $'\u701f'
+  shade              $'\u7043'
+  snow               $'\u7040'
   left_point         $'\ue0c3' #
 )
 
@@ -192,17 +197,19 @@ function prompt_weather(){
     elif [ $text = '多云' ];then
         local icon="%{$fg[white]%}${ICONS[windy]}%{$fg[white]%}"
     elif [ $text = '大雨' ];then
-        local icon="%{$FG[17]%}${ICONS[rain]} ${ICONS[rain]} ${ICONS[rain]}%{$fg[white]%}"
+        local icon="%{$FG[17]%}${ICONS[heavy_rain]}%{$fg[white]%}"
     elif [ $text = '中雨' ];then
-        local icon="%{$FG[17]%}${ICONS[rain]} ${ICONS[rain]}%{$fg[white]%}"
-#    elif [ $text = '阴' ];then
-        #local icon="%{$FG[243]%}${ICONS[shade]}%{$fg[white]%}"
-#    elif [ $text = '雷阵雨' ];then
-        #local icon="%{$FG[17]%} ⛈ %{$fg[white]%}"
-    #elif [[ $text =~ '雨' ]];then #包含
-        #local icon="%{$FG[17]%}${ICONS[rain]}%{$fg[white]%}"
-    #elif [[ $text =~ '雪' ]];then #包含
-#        local icon="%{$FG[17]%} ☃️  %{$fg[white]%}"
+        local icon="%{$FG[17]%}${ICONS[rain]}%{$fg[white]%}"
+    elif [ $text = '小雨' ];then
+        local icon="%{$FG[17]%}${ICONS[litte_rain]}%{$fg[white]%}"
+    elif [ $text = '阴' ];then
+        local icon="%{$FG[243]%}${ICONS[shade]}%{$fg[white]%}"
+    elif [[ $text =~ '雷' ]];then
+        local icon="%{$FG[17]%}${ICONS[thunder]}%{$fg[white]%}"
+    elif [[ $text =~ '雨' ]];then #包含
+        local icon="%{$FG[17]%}${ICONS[other_rain]}%{$fg[white]%}"
+    elif [[ $text =~ '雪' ]];then #包含
+        local icon="%{$FG[17]%}${ICONS[snow]}%{$fg[white]%}"
     else
         local icon="%{$fg[white]%}${text}%{$fg[white]%}"
         #local icon="%{$fg[red]%}×%{$fg[white]%}"
